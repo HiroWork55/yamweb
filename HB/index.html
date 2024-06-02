@@ -1,0 +1,219 @@
+<html lang="”ja”">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="content-language" content="en" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="google" content="notranslate" />
+    <style>
+      body {
+        margin: 4;
+      }
+      .input_number {
+        display: inline-block;
+        width: 70px;
+        padding: 0.5em;
+        border: 1px solid #999;
+      }
+      .select {
+        width: 100px;
+      }
+      .white {
+        color: white;
+      }
+      .box {
+        width: 250px;
+        /* 横幅を250pxに指定 */
+        height: 300px;
+        /* 縦幅を300pxに指定 */
+        overflow-y: scroll;
+        /* 縦方向にスクロール可能にする */
+        font-weight: bold;
+        scrollbar-color: blue #f5f5dc;
+      }
+      .ans {
+        color: blue;
+      }
+    </style>
+    <script>
+      var score = 0;
+      var answer = [];
+      //
+      // 答え生成（同一なし４桁）
+      function random_ans() {
+        let arr = ["0", "0", "0", "0"];
+        let res = true;
+        let sel = "";
+        for (let i = 0; i < 4; i++) {
+          do {
+            sel = String(Math.floor(Math.random() * 9) + 1);
+            res = arr.includes(sel);
+          } while (res);
+          arr[i] = sel;
+        }
+        return arr;
+      }
+      //
+      // Memo仮説option初期セット
+      function create_option() {
+        let arr = [" ", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+        for (let n = 1; n < 5; n++) {
+          let sel = document.getElementById("select" + n);
+          for (let num in arr) {
+            let op = document.createElement("option");
+            op.text = arr[num];
+            sel.appendChild(op);
+          }
+        }
+      }
+      //
+      // 画面起動時
+      window.onload = function () {
+        create_option();
+        onReset();
+      };
+      //
+      // HIT数 BLOW数 算出
+      function check_hit_blow_num(inp_num, target_num) {
+        let hit = 0;
+        let blow = 0;
+        let idx = 0;
+        let inp = inp_num.split("");
+        for (let i = 0; i < 4; i++) {
+          // hit
+          idx = target_num.indexOf(inp[i]);
+          switch (idx) {
+            case -1:
+              break;
+            case i:
+              hit++;
+              break;
+            default:
+              blow++;
+          }
+        }
+        return [hit, blow];
+      }
+      //
+      // ＣＨＥＣＫ
+      function onClick() {
+        score++;
+        input_number = document.getElementById("in_num");
+        let result = check_hit_blow_num(input_number.value, answer);
+
+        result_text =
+          score +
+          " : " +
+          input_number.value +
+          " : " +
+          result[0] +
+          " hit " +
+          result[1] +
+          " blow";
+
+        if (result[0] == 4) {
+          document.getElementById("reset").disabled = null;
+          document.getElementById("run").disabled = "disabled";
+          result_text +=
+            `<br><big class="ans">You got it !! (` + score + `times)</big>`;
+        }
+
+        document.querySelector(
+          "#result"
+        ).innerHTML += `<div>${result_text}</div>`;
+        document.getElementById("in_num").value = "";
+      }
+      //
+      // ＳＴＡＲＴ
+      function onReset() {
+        document.body.setAttribute("translate", "no");
+        document.getElementById("in_num").value = "";
+        document.querySelector("#result").innerHTML = "";
+        document.getElementById("reset").disabled = "disabled";
+        document.getElementById("run").disabled = null;
+        score = 0;
+        answer = random_ans();
+        console.log("ans is " + answer);
+        for (let i = 1; i < 5; i++) {
+          document.getElementById("select" + i).value = "";
+          document.getElementById("select" + i).style.backgroundColor =
+            "#F5F5DC";
+        }
+        document.getElementById("btn0").style.backgroundColor = "#B0C4DE";
+        for (let i = 1; i < 10; i++) {
+          document.getElementById("btn" + i).style.backgroundColor = "#F5F5DC";
+        }
+      }
+      //
+      // Memo有無スイッチon/off
+      function OnOff(lol) {
+        if (lol.style.backgroundColor != "gray") {
+          lol.style.backgroundColor = "gray";
+        } else {
+          lol.style.backgroundColor = "#F5F5DC";
+        }
+      }
+      //
+      // TRY ← Memo仮説
+      function SetNo() {
+        wNo = "";
+        for (let i = 1; i < 5; i++) {
+          wNo = wNo + document.getElementById("select" + i).value;
+        }
+        document.getElementById("in_num").value = wNo;
+      }
+    </script>
+  </head>
+  <body background="unsplash.png">
+    <!-- <!DOCTYPE html> -->
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>Hit And Blow ver 0.01</title>
+      </head>
+
+      <body>
+        <h2 class="white">◆ Hit And Blow ◆</h2>
+        <div>
+          <button id="reset" type="button" onclick="onReset()">START</button>
+        </div>
+        <hr />
+        <div>
+          <table>
+            <td width="90">
+              <span class="white">[TRY]</span><br />
+              <input
+                class="input_number"
+                type="number"
+                id="in_num"
+                style="background-color: white"
+                oninput="javascript: this.value = this.value.slice(0, 4)"
+              />
+              <br />
+              <button id="run" type="button" onclick="onClick()">CHECK</button>
+            </td>
+            <td>
+              <span class="white">[Memo]</span><br />
+              <input type="button" id="btn0" value="<" onClick="SetNo();" />
+              <select id="select1"></select>
+              <select id="select2"></select>
+              <select id="select3"></select>
+              <select id="select4"></select>
+              <br />
+              <input type="button" id="btn1" value="1" onClick="OnOff(this);" />
+              <input type="button" id="btn2" value="2" onClick="OnOff(this);" />
+              <input type="button" id="btn3" value="3" onClick="OnOff(this);" />
+              <input type="button" id="btn4" value="4" onClick="OnOff(this);" />
+              <input type="button" id="btn5" value="5" onClick="OnOff(this);" />
+              <input type="button" id="btn6" value="6" onClick="OnOff(this);" />
+              <input type="button" id="btn7" value="7" onClick="OnOff(this);" />
+              <input type="button" id="btn8" value="8" onClick="OnOff(this);" />
+              <input type="button" id="btn9" value="9" onClick="OnOff(this);" />
+            </td>
+          </table>
+        </div>
+        <hr />
+        <div id="result" class="box"></div>
+      </body>
+    </html>
+  </body>
+</html>
