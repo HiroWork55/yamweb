@@ -6,7 +6,7 @@ const app = express();
 const http = require("http");
 const server = http.createServer(app);
 const { Server } = require("socket.io");
-const io = new Server(server, { pingInterval: 2000, pingTimeout: 5000 });
+const io = new Server(server);
 
 const port = 3000;
 
@@ -16,8 +16,16 @@ app.get("/", (req, res) => {
   res.sendFile(__dirname + "/index.html");
 });
 
+
+io.on('connection', (socket) => {
+  console.log('a user connected: ' + socket.id)
+  io.emit('update')
+})
+
+
 server.listen(port, () => {
   console.log(`Im listening on port ${port}`);
 });
 
-console.log("server did load");
+
+console.log("server did load 003");
